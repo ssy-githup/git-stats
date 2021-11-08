@@ -31,7 +31,8 @@ params = {
     "token": '', # token信息
     "base_url": 'http://gitlab2.bitautotech.com/api/v4', #gitlab api访问url前缀， eg. https://gitlab.com/api/v4
     "since_date": '', #统计开始日期， eg. 2019-09-05 00:00:00
-    "until_date": '' # 统计终止日期, eg. 2019-09-12 00:00:00
+    "until_date": '', # 统计终止日期, eg. 2019-09-12 00:00:00
+    "filter":'AutoAftermarket'
 }
 
 def get_data(url):
@@ -265,6 +266,10 @@ def write_to_mysql(headers, data_dict):
 
     for item in data_dict.values():
         itemDic:dict = item
+        # filter group
+        if params['filter'] not in itemDic['group']:
+            continue
+        
         values = []
         for ki in range(len(headers)):
             values.append(itemDic[headers[ki]])
@@ -319,6 +324,8 @@ def main(argv):
         elif opt in ("-u", "--untildate"):
             params['until_date'] = arg
             has_until_date = 1
+        elif opt in ("-f", "--filter"):
+            params['filter'] = arg
 
     if has_token == 0: #or has_since_date == 0 or has_until_date == 0:
         usage()
