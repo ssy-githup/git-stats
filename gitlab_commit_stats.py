@@ -1,14 +1,13 @@
 # encoding: utf8
 import os
 import json
-import datetime
+import time,datetime
 import requests
-import smtplib
+#import smtplib
 import sys, getopt
 import csv
 import codecs
 import pymysql
-
 from email import encoders
 from email.header import Header
 from email.mime.text import MIMEText
@@ -180,7 +179,7 @@ def write_csv_dict(filename, headers, data_dict):
             f_csv.writerow(v)
     
 
-def stas():
+def getStas():
     print('starting get git stas .....')
     projects = get_projects()
 
@@ -240,8 +239,9 @@ def stas():
                 'total': commit['total'],
                 'commit_count': commit['commit_count']
             }
-
-    print(author_stats)
+            # if email_name.get(commit['email']):
+            #     author_stats[author_name]['name'] = email_name[commit['email']]
+    
 
     commit_stats_headers = ["group", "project", "email", "name", 'author_name', "additions", "deletions", "total", "commit_count"]
     write_to_mysql(commit_stats_headers, author_stats)
@@ -262,12 +262,17 @@ def write_to_mysql(headers, data_dict):
     cur = conn.cursor()
     
     sqltemplate = 'insert into ' + params['mysql']['table'] + ' values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'
-    for k, v in data_dict.items():
+
+    for item in data_dict.values():
+        itemDic:dict = item
         values = []
-        values.extend(v.values())
+        for ki in range(len(headers)):
+            values.append(itemDic[headers[ki]])
+        #values.extend(v.values())
         values.append(params['since_date'])
         values.append(params['until_date'])
         insertDB(cur,sqltemplate,values)
+        print('写入SQL Item:')
         print(values)
 
     conn.commit()
@@ -281,16 +286,6 @@ def get_mysqlconn():
                         db=params['mysql']['db'],charset="utf8"   )
     return db
 
-
-
-# def read_csv_to_mysql(filename):
-#     with codecs.open(filename=filename,mode='r',encoding='utf-8-sig') as f:
-#         reader = csv.reader(f)
-#         headerText = next(reader)
-#         print(headerText)
-#         for row in reader:
-#             args = tuple(row)
-#             print(args)
 
 
 
@@ -325,15 +320,26 @@ def main(argv):
             params['until_date'] = arg
             has_until_date = 1
 
-    if has_token == 0 or has_since_date == 0 or has_until_date == 0:
+    if has_token == 0: #or has_since_date == 0 or has_until_date == 0:
         usage()
         sys.exit()
 
-    print(params)
 
-    stas()
+    if params['since_date'] == '' and params['until_date'] =='':
+        params['since_date'],params['until_date'] = getStatsTime()
+
+    print(params)
+    getStas()
+    print('complated & exit')
    
-    #read_csv_to_mysql('./commit_stats.csv')
+def getYesterday(): 
+    yesterday = datetime.date.today() + datetime.timedelta(-1)
+    return yesterday
+
+def getStatsTime():
+    strDate = getYesterday().strftime("%Y-%m-%d")
+    return strDate +' 00:00:00' , strDate + ' 23:59:59'
+
 
 if __name__ == "__main__":
     main(sys.argv[1:])

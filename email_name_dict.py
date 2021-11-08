@@ -1,3 +1,4 @@
 email_name={
-    "ji.jinfeng@zhongfl.com":"纪金峰"
+    "zhanglei23@yiche.com": '张磊',
+    "tangcl@yiche.com" :'唐春丽'
 }

@@ -37,4 +37,11 @@ Usage: python gitlab_commit_stats.py -t <token> -s <since_date> -u <until_date> 
 
 
 ##### 例子
+* 取指定时间段的数据:
+
 python3 gitlab_commit_stats.py -t JZiz8Z5ewz6gu_SWSSay -s "2021-11-01 00:00:00" -u "2021-11-05 23:59:59" -a https://gitlab2.bitautotech.com/api/v4
+
+
+* 取昨天的数据:
+
+python3 gitlab_commit_stats.py -t JZiz8Z5ewz6gu_SWSSay -a https://gitlab2.bitautotech.com/api/v4
