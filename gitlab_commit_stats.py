@@ -262,20 +262,24 @@ def write_to_mysql(headers, data_dict):
     conn = get_mysqlconn()
     cur = conn.cursor()
     
-    sqltemplate = 'insert into ' + params['mysql']['table'] + ' values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'
+    sqltemplate = 'insert into ' + params['mysql']['table'] + ' values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'
 
     for item in data_dict.values():
         itemDic:dict = item
         # filter group
         if params['filter'] not in itemDic['group']:
             continue
-        
+
         values = []
         for ki in range(len(headers)):
             values.append(itemDic[headers[ki]])
         #values.extend(v.values())
         values.append(params['since_date'])
         values.append(params['until_date'])
+
+        strDate = getYesterday().strftime("%Y%m%d")
+        values.append(int(strDate))
+
         insertDB(cur,sqltemplate,values)
         print('写入SQL Item:')
         print(values)
