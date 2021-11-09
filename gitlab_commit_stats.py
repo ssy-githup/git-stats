@@ -251,6 +251,8 @@ def getStas():
 
 
 def insertDB(cur,sql,args):
+    print(sql)
+    print(args)
     try:
         cur.execute(sql,args)
     except Exception as e:
@@ -261,8 +263,7 @@ def write_to_mysql(headers, data_dict):
     print(headers)
     conn = get_mysqlconn()
     cur = conn.cursor()
-    
-    sqltemplate = 'insert into ' + params['mysql']['table'] + ' values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'
+    sqltemplate = 'INSERT INTO ' + params['mysql']['table'] + '(`group`,`project`,`email`,`name`,`author_name`,`additions`,`deletions`,`total`,`commit_count`,`start_at`,`end_at`,`timespan`) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'
 
     for item in data_dict.values():
         itemDic:dict = item
@@ -281,8 +282,8 @@ def write_to_mysql(headers, data_dict):
         values.append(int(strDate))
 
         insertDB(cur,sqltemplate,values)
-        print('写入SQL Item:')
-        print(values)
+        #print('写入SQL Item:')
+        #print(values)
 
     conn.commit()
     cur.close()

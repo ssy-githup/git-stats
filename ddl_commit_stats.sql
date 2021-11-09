@@ -3,7 +3,8 @@
 /*   TableName = commit_stats   */
 /******************************************/
 CREATE TABLE `commit_stats` (
-  `﻿group` varchar(255) DEFAULT NULL COMMENT 'group/subgroup',
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `group` varchar(255) DEFAULT NULL COMMENT 'group/subgroup',
   `project` varchar(255) DEFAULT NULL COMMENT 'project',
   `email` varchar(255) DEFAULT NULL COMMENT 'person email',
   `name` varchar(255) NOT NULL COMMENT 'commit name',
@@ -15,11 +16,12 @@ CREATE TABLE `commit_stats` (
   `start_at` datetime NOT NULL COMMENT 'start of collection time',
   `end_at` datetime NOT NULL COMMENT 'end of collection time',
   `timespan` int(10) unsigned NOT NULL COMMENT 'statistical time',
-  KEY `idx_group` (`﻿group`),
+  PRIMARY KEY (`id`),
+  KEY `idx_group` (`group`),
   KEY `idx_project` (`project`),
   KEY `idx_name` (`author_name`),
   KEY `idx_time` (`timespan`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 AVG_ROW_LENGTH=606 COMMENT='commit statistical infomation'
+) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=utf8mb4 AVG_ROW_LENGTH=606 COMMENT='commit statistical infomation'
 ;
 
 
