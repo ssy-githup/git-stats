@@ -1,0 +1,1 @@
+python gitlab_commit_stats.py -t JZiz8Z5ewz6gu_SWSSay  -a https://gitlab2.bitautotech.com/api/v4
