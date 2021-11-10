@@ -139,8 +139,9 @@ def get_branches_page(project_id, page):
     return result
 
 # /projects
-def get_projects():
-    url = "%s/projects?per_page=2000" % params['base_url']
+def get_projects(page):
+    url = "%s/projects?per_page=100&page=%s&search_namespaces=true&search=%s" % (params['base_url'],page,params['filter'])
+    print(url)
     rs = get_data(url)
 
     projects = []
@@ -182,19 +183,24 @@ def write_csv_dict(filename, headers, data_dict):
 
 def getStas():
     print('starting get git stas .....')
-    projects = get_projects()
+    projects = []
 
+    for index in range(1,3):
+        pageProjects = get_projects(index)
+        projects+=pageProjects
+  
     # project_headers = ["id",
-    #         "name",
-    #         "path_with_namespace",
-    #         "ssh_url_to_repo",
-    #         "http_url_to_repo",
-    #         "namespace",
-    #         "branches"]
-    # write_csv_obj('./projects.csv', project_headers, projects)
+    #     "name",
+    #     "path_with_namespace",
+    #     "ssh_url_to_repo",
+    #     "http_url_to_repo",
+    #     "namespace",
+    #     "branches"]
+
+    #write_csv_obj('./projects.csv', project_headers, projects)
 
     print('1. 获取项目结束， 共有项目数量：', len(projects))
-
+    # print(projects)
     commits = []
 
     for p in projects:
@@ -215,39 +221,39 @@ def getStas():
     # 保存提交日志明细到commit_details.csv文件
     print("---- get commits ---------------------------------------------------")
     # print(commits)
-    # write_csv_obj('./commit_details.csv', commit_details_headers, commits)
+    #write_csv_obj('./commit_details.csv', commit_details_headers, commits)
 
     author_stats = {}
 
     print('4. 获取所有提交结束，开始进行统计')
-    for commit in commits:
-        author_name = commit['email']
-        if author_name in author_stats:
-            author_commit = author_stats[author_name]
-            author_commit['additions'] += commit['additions']
-            author_commit['deletions'] += commit['deletions']
-            author_commit['total'] += commit['total']
-            author_commit['commit_count'] += 1
-        else:
-            author_stats[author_name] = {
-                'name': commit['name'], 
-                'email': commit['email'], 
-                'author_name': commit['author_name'],
-                'group': commit['group'],
-                'project':commit['project'],
-                'additions': commit['additions'],
-                'deletions': commit['deletions'],
-                'total': commit['total'],
-                'commit_count': commit['commit_count']
-            }
+    # for commit in commits:
+    #     author_name = commit['email']
+    #     if author_name in author_stats:
+    #         author_commit = author_stats[author_name]
+    #         author_commit['additions'] += commit['additions']
+    #         author_commit['deletions'] += commit['deletions']
+    #         author_commit['total'] += commit['total']
+    #         author_commit['commit_count'] += 1
+    #     else:
+    #         author_stats[author_name] = {
+    #             'name': commit['name'], 
+    #             'email': commit['email'], 
+    #             'author_name': commit['author_name'],
+    #             'group': commit['group'],
+    #             'project':commit['project'],
+    #             'additions': commit['additions'],
+    #             'deletions': commit['deletions'],
+    #             'total': commit['total'],
+    #             'commit_count': commit['commit_count']
+    #         }
             # if email_name.get(commit['email']):
             #     author_stats[author_name]['name'] = email_name[commit['email']]
     
 
     commit_stats_headers = ["group", "project", "email", "name", 'author_name', "additions", "deletions", "total", "commit_count"]
-    write_to_mysql(commit_stats_headers, author_stats)
+    write_to_mysql(commit_stats_headers, commits)
     #write_csv_dict('./commit_stats.csv', commit_stats_headers, author_stats)
-    # write_csv_file(author_stats)
+    #write_csv_file(author_stats)
 
 
 def insertDB(cur,sql,args):
@@ -265,11 +271,11 @@ def write_to_mysql(headers, data_dict):
     cur = conn.cursor()
     sqltemplate = 'INSERT INTO ' + params['mysql']['table'] + '(`group`,`project`,`email`,`name`,`author_name`,`additions`,`deletions`,`total`,`commit_count`,`start_at`,`end_at`,`timespan`) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'
 
-    for item in data_dict.values():
+    for item in data_dict:
         itemDic:dict = item
         # filter group
-        if params['filter'] not in itemDic['group']:
-            continue
+        # if params['filter'] not in itemDic['group']:
+        #     continue
 
         values = []
         for ki in range(len(headers)):
