@@ -345,7 +345,8 @@ def main(argv):
 
     if params['since_date'] == '' and params['until_date'] =='':
         params['since_date'],params['until_date'] = getStatsTime()
-
+    
+    print('gitlab stats starting...... , at time : '  +  time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) )
     print(params)
     getStas()
     print('complated & exit')
