@@ -8,6 +8,7 @@ import sys, getopt
 import csv
 import codecs
 import pymysql
+
 from email import encoders
 from email.header import Header
 from email.mime.text import MIMEText
@@ -105,8 +106,9 @@ def get_commits_page(project_id, project_name, branch_name, group_name, page):
                 'additions': stats['additions'], 
                 'deletions': stats['deletions'], 
                 'total': stats['total'],
-                'commit_count': 1
-                })
+                'commit_count': 1,
+                'message': commit['message']
+        })
     return commit_details
 
 # /projects/:id/repository/branches/
@@ -213,11 +215,13 @@ def getStas():
             branch_commits = get_commits(project_id, project_name, b, p['namespace'])
             print('3. 获取项目', p['namespace'], '/', project_name, ' 分支：', b, '所有提交结束, len:', len(branch_commits))
             commits += branch_commits
+
+            #commits.append(b)
             print('total commits len:', len(commits))
 
     print('commits len:', len(commits))
 
-    commit_details_headers = ['commit_id','name', 'email', 'author_name','group','project', 'branch', 'additions', 'deletions', 'total','commit_count']
+    commit_details_headers = ['commit_id','name', 'email', 'author_name','group','project', 'branch', 'additions', 'deletions', 'total','commit_count','message','branch']
     # 保存提交日志明细到commit_details.csv文件
     print("---- get commits ---------------------------------------------------")
     # print(commits)
@@ -250,7 +254,7 @@ def getStas():
             #     author_stats[author_name]['name'] = email_name[commit['email']]
     
 
-    commit_stats_headers = ["group", "project", "email", "name", 'author_name', "additions", "deletions", "total", "commit_count"]
+    commit_stats_headers = ["group", "project", "email", "name", 'author_name', "additions", "deletions", "total", "commit_count",'message','branch']
     write_to_mysql(commit_stats_headers, commits)
     #write_csv_dict('./commit_stats.csv', commit_stats_headers, author_stats)
     #write_csv_file(author_stats)
@@ -269,7 +273,7 @@ def write_to_mysql(headers, data_dict):
     print(headers)
     conn = get_mysqlconn()
     cur = conn.cursor()
-    sqltemplate = 'INSERT INTO ' + params['mysql']['table'] + '(`group`,`project`,`email`,`name`,`author_name`,`additions`,`deletions`,`total`,`commit_count`,`start_at`,`end_at`,`timespan`) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'
+    sqltemplate = 'INSERT INTO ' + params['mysql']['table'] + '(`group`,`project`,`email`,`name`,`author_name`,`additions`,`deletions`,`total`,`commit_count`,`message`,`branch`,`start_at`,`end_at`,`timespan`) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'
 
     for item in data_dict:
         itemDic:dict = item
