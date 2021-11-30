@@ -22,11 +22,11 @@ all_commits={}
 # 参数
 params = {
     "mysql": {
-        "host": '192.168.87.208',
+        "host": 'mysqlchehouyunwei.service.yctxy',
         "port": 3306,
-        "user": 'root',
-        "password": '43RmMZzX7yZkpFe',
-        "db": 'test_mysql',
+        "user": 'chehouyunweisentry_rw',
+        "password": 'u=PGqIwfEI5=DTS',
+        "db": 'chehouyunweisentry',
         "table": 'commit_stats' 
     },
     "token": '', # token信息
@@ -218,13 +218,13 @@ def getStas():
 
             #commits.append(b)
             print('total commits len:', len(commits))
-
+    print('')
     print('commits len:', len(commits))
 
     commit_details_headers = ['commit_id','name', 'email', 'author_name','group','project', 'branch', 'additions', 'deletions', 'total','commit_count','message','branch']
     # 保存提交日志明细到commit_details.csv文件
     print("---- get commits ---------------------------------------------------")
-    # print(commits)
+    print(commits)
     #write_csv_obj('./commit_details.csv', commit_details_headers, commits)
 
     author_stats = {}
