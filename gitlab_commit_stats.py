@@ -8,7 +8,6 @@ import sys, getopt
 import csv
 import codecs
 import pymysql
-
 from email import encoders
 from email.header import Header
 from email.mime.text import MIMEText
@@ -27,7 +26,14 @@ params = {
         "user": 'chehouyunweisentry_rw',
         "password": 'u=PGqIwfEI5=DTS',
         "db": 'chehouyunweisentry',
-        "table": 'commit_stats' 
+        "table": 'commit_stats'
+
+        # "host": '192.168.87.208',
+        # "port": 3306,
+        # "user": 'root',
+        # "password": '43RmMZzX7yZkpFe',
+        # "db": 'test_mysql',
+        # "table": 'commit_stats'
     },
     "token": '', # token信息
     "base_url": 'http://gitlab2.bitautotech.com/api/v4', #gitlab api访问url前缀， eg. https://gitlab.com/api/v4
@@ -77,6 +83,11 @@ def get_commits(project_id, project_name, branch_name, group_name):
 
     return result
 
+
+def dateChangeFormat(param, param1):
+    pass
+
+
 def get_commits_page(project_id, project_name, branch_name, group_name, page):
     url = "%s/projects/%s/repository/commits?page=%s&per_page=100&ref_name=%s&since=%s&until=%s&with_stats=yes" % (params['base_url'], project_id, page, branch_name, params['since_date'], params['until_date'])
     print(url)
@@ -107,7 +118,8 @@ def get_commits_page(project_id, project_name, branch_name, group_name, page):
                 'deletions': stats['deletions'], 
                 'total': stats['total'],
                 'commit_count': 1,
-                'message': commit['message']
+                'message': commit['message'],
+                'committed_date': datetime.datetime.strptime(commit['committed_date'], '%Y-%m-%dT%H:%M:%S.000+08:00')
         })
     return commit_details
 
@@ -221,7 +233,7 @@ def getStas():
     print('')
     print('commits len:', len(commits))
 
-    commit_details_headers = ['commit_id','name', 'email', 'author_name','group','project', 'branch', 'additions', 'deletions', 'total','commit_count','message','branch']
+    commit_details_headers = ['commit_id','name', 'email', 'author_name','group','project', 'branch', 'additions', 'deletions', 'total','commit_count','message','branch','committed_date']
     # 保存提交日志明细到commit_details.csv文件
     print("---- get commits ---------------------------------------------------")
     print(commits)
@@ -254,7 +266,7 @@ def getStas():
             #     author_stats[author_name]['name'] = email_name[commit['email']]
     
 
-    commit_stats_headers = ["group", "project", "email", "name", 'author_name', "additions", "deletions", "total", "commit_count",'message','branch']
+    commit_stats_headers = ["group", "project", "email", "name", 'author_name', "additions", "deletions", "total", "commit_count",'message','branch','committed_date']
     write_to_mysql(commit_stats_headers, commits)
     #write_csv_dict('./commit_stats.csv', commit_stats_headers, author_stats)
     #write_csv_file(author_stats)
@@ -273,7 +285,7 @@ def write_to_mysql(headers, data_dict):
     print(headers)
     conn = get_mysqlconn()
     cur = conn.cursor()
-    sqltemplate = 'INSERT INTO ' + params['mysql']['table'] + '(`group`,`project`,`email`,`name`,`author_name`,`additions`,`deletions`,`total`,`commit_count`,`message`,`branch`,`start_at`,`end_at`,`timespan`) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'
+    sqltemplate = 'INSERT INTO ' + params['mysql']['table'] + '(`group`,`project`,`email`,`name`,`author_name`,`additions`,`deletions`,`total`,`commit_count`,`message`,`branch`,`committed_date`,`start_at`,`end_at`,`timespan`) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'
 
     for item in data_dict:
         itemDic:dict = item
