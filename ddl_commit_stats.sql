@@ -16,6 +16,8 @@ CREATE TABLE `commit_stats` (
   `start_at` datetime NOT NULL COMMENT 'start of collection time',
   `end_at` datetime NOT NULL COMMENT 'end of collection time',
   `timespan` int(10) unsigned NOT NULL COMMENT 'statistical time',
+  `message`  varchar(255) NOT NULL COMMENT 'total commit message',
+  `branch`  varchar(255) NOT NULL COMMENT 'branch',
   PRIMARY KEY (`id`),
   KEY `idx_group` (`group`),
   KEY `idx_project` (`project`),
