@@ -1,9 +1,9 @@
 # encoding: utf8
 import os
 import json
-import time,datetime
+import time, datetime
 import requests
-#import smtplib
+# import smtplib
 import sys, getopt
 import csv
 import codecs
@@ -15,8 +15,8 @@ from email.utils import parseaddr, formataddr
 from email_name_dict import email_name
 
 project_result = {}
-#防重处理
-all_commits={}
+# 防重处理
+all_commits = {}
 
 # 参数
 params = {
@@ -35,12 +35,13 @@ params = {
         # "db": 'test_mysql',
         # "table": 'commit_stats'
     },
-    "token": '', # token信息
-    "base_url": 'http://gitlab2.bitautotech.com/api/v4', #gitlab api访问url前缀， eg. https://gitlab.com/api/v4
-    "since_date": '', #统计开始日期， eg. 2019-09-05 00:00:00
-    "until_date": '', # 统计终止日期, eg. 2019-09-12 00:00:00
-    "filter":'AutoAftermarket'
+    "token": '',  # token信息
+    "base_url": 'http://gitlab2.bitautotech.com/api/v4',  # gitlab api访问url前缀， eg. https://gitlab.com/api/v4
+    "since_date": '',  # 统计开始日期， eg. 2019-09-05 00:00:00
+    "until_date": '',  # 统计终止日期, eg. 2019-09-12 00:00:00
+    "filter": 'AutoAftermarket'
 }
+
 
 def get_data(url):
     headers = {
@@ -61,15 +62,15 @@ def get_data(url):
     return rs
 
 
-#http://git.opsnow.tech/api/v4/groups/47/issues\?state\=opened
+# http://git.opsnow.tech/api/v4/groups/47/issues\?state\=opened
 # /projects/:id/issues
 def get_issue_by_projectid(project_id):
     url = "%s/projects/%s/issues?per_page=2000" % (params['base_url'], project_id)
     return get_data(url)
 
+
 # /projects/:id/repository/commits?ref_name=master&since=&until=
 def get_commits(project_id, project_name, branch_name, group_name):
-
     result = []
 
     page = 1
@@ -89,7 +90,8 @@ def dateChangeFormat(param, param1):
 
 
 def get_commits_page(project_id, project_name, branch_name, group_name, page):
-    url = "%s/projects/%s/repository/commits?page=%s&per_page=100&ref_name=%s&since=%s&until=%s&with_stats=yes" % (params['base_url'], project_id, page, branch_name, params['since_date'], params['until_date'])
+    url = "%s/projects/%s/repository/commits?page=%s&per_page=100&ref_name=%s&since=%s&until=%s&with_stats=yes" % (
+        params['base_url'], project_id, page, branch_name, params['since_date'], params['until_date'])
     print(url)
     rs = get_data(url)
 
@@ -107,25 +109,25 @@ def get_commits_page(project_id, project_name, branch_name, group_name, page):
         if commiter_email in email_name:
             author_name = email_name[commiter_email]
         commit_details.append({
-                'commit_id': commit_id,
-                'name': commit['committer_name'], 
-                'email': commit['committer_email'], 
-                'author_name': author_name,
-                'group': group_name,
-                'project':project_name, 
-                'branch': branch_name, 
-                'additions': stats['additions'], 
-                'deletions': stats['deletions'], 
-                'total': stats['total'],
-                'commit_count': 1,
-                'message': commit['message'],
-                'committed_date': datetime.datetime.strptime(commit['committed_date'], '%Y-%m-%dT%H:%M:%S.000+08:00')
+            'commit_id': commit_id,
+            'name': commit['committer_name'],
+            'email': commit['committer_email'],
+            'author_name': author_name,
+            'group': group_name,
+            'project': project_name,
+            'branch': branch_name,
+            'additions': stats['additions'],
+            'deletions': stats['deletions'],
+            'total': stats['total'],
+            'commit_count': 1,
+            'message': commit['message'],
+            'committed_date': datetime.datetime.strptime(commit['committed_date'], '%Y-%m-%dT%H:%M:%S.000+08:00')
         })
     return commit_details
 
+
 # /projects/:id/repository/branches/
 def get_branches(project_id):
-
     page = 1
 
     result = []
@@ -139,22 +141,25 @@ def get_branches(project_id):
 
     return result
 
+
 def get_branches_page(project_id, page):
     url = "%s/projects/%s/repository/branches?page=%s&per_page=100" % (params['base_url'], project_id, page)
-    
+
     rs = get_data(url)
 
     result = []
     for branch in rs:
-        if isinstance(branch,dict):
+        if isinstance(branch, dict):
             branch_name = branch['name']
             result.append(branch_name)
 
     return result
 
+
 # /projects
 def get_projects(page):
-    url = "%s/projects?per_page=100&page=%s&search_namespaces=true&search=%s" % (params['base_url'],page,params['filter'])
+    url = "%s/projects?per_page=100&page=%s&search_namespaces=true&search=%s" % (
+        params['base_url'], page, params['filter'])
     print(url)
     rs = get_data(url)
 
@@ -174,17 +179,19 @@ def get_projects(page):
             "branches": []
         }
         # if p['namespace'].startswith('PD/Private2.0') or p['namespace'].startswith('oc-si') or p['namespace'].startswith('PD/Private'):
-            # projects.append(p)
+        # projects.append(p)
         projects.append(p)
         namespaces[p['namespace']] = {}
 
     return projects
+
 
 def write_csv_obj(filename, headers, data_rows):
     with open(filename, 'w', encoding='utf-8-sig') as f:
         f_csv = csv.DictWriter(f, headers)
         f_csv.writeheader()
         f_csv.writerows(data_rows)
+
 
 def write_csv_dict(filename, headers, data_dict):
     with open(filename, 'w', encoding='utf-8-sig') as f:
@@ -193,16 +200,16 @@ def write_csv_dict(filename, headers, data_dict):
 
         for k, v in data_dict.items():
             f_csv.writerow(v)
-    
+
 
 def getStas():
     print('starting get git stas .....')
     projects = []
 
-    for index in range(1,3):
+    for index in range(1, 3):
         pageProjects = get_projects(index)
-        projects+=pageProjects
-  
+        projects += pageProjects
+
     # project_headers = ["id",
     #     "name",
     #     "path_with_namespace",
@@ -211,7 +218,7 @@ def getStas():
     #     "namespace",
     #     "branches"]
 
-    #write_csv_obj('./projects.csv', project_headers, projects)
+    # write_csv_obj('./projects.csv', project_headers, projects)
 
     print('1. 获取项目结束， 共有项目数量：', len(projects))
     # print(projects)
@@ -228,16 +235,17 @@ def getStas():
             print('3. 获取项目', p['namespace'], '/', project_name, ' 分支：', b, '所有提交结束, len:', len(branch_commits))
             commits += branch_commits
 
-            #commits.append(b)
+            # commits.append(b)
             print('total commits len:', len(commits))
     print('')
     print('commits len:', len(commits))
 
-    commit_details_headers = ['commit_id','name', 'email', 'author_name','group','project', 'branch', 'additions', 'deletions', 'total','commit_count','message','branch','committed_date']
+    commit_details_headers = ['commit_id', 'name', 'email', 'author_name', 'group', 'project', 'branch', 'additions',
+                              'deletions', 'total', 'commit_count', 'message', 'branch', 'committed_date']
     # 保存提交日志明细到commit_details.csv文件
     print("---- get commits ---------------------------------------------------")
     print(commits)
-    #write_csv_obj('./commit_details.csv', commit_details_headers, commits)
+    # write_csv_obj('./commit_details.csv', commit_details_headers, commits)
 
     author_stats = {}
 
@@ -262,21 +270,21 @@ def getStas():
     #             'total': commit['total'],
     #             'commit_count': commit['commit_count']
     #         }
-            # if email_name.get(commit['email']):
-            #     author_stats[author_name]['name'] = email_name[commit['email']]
-    
+    # if email_name.get(commit['email']):
+    #     author_stats[author_name]['name'] = email_name[commit['email']]
 
-    commit_stats_headers = ["group", "project", "email", "name", 'author_name', "additions", "deletions", "total", "commit_count",'message','branch','committed_date']
+    commit_stats_headers = ["group", "project", "email", "name", 'author_name', "additions", "deletions", "total",
+                            "commit_count", 'message', 'branch', 'committed_date']
     write_to_mysql(commit_stats_headers, commits)
-    #write_csv_dict('./commit_stats.csv', commit_stats_headers, author_stats)
-    #write_csv_file(author_stats)
+    # write_csv_dict('./commit_stats.csv', commit_stats_headers, author_stats)
+    # write_csv_file(author_stats)
 
 
-def insertDB(cur,sql,args):
+def insertDB(cur, sql, args):
     print(sql)
     print(args)
     try:
-        cur.execute(sql,args)
+        cur.execute(sql, args)
     except Exception as e:
         print(e)
 
@@ -285,10 +293,11 @@ def write_to_mysql(headers, data_dict):
     print(headers)
     conn = get_mysqlconn()
     cur = conn.cursor()
-    sqltemplate = 'INSERT INTO ' + params['mysql']['table'] + '(`group`,`project`,`email`,`name`,`author_name`,`additions`,`deletions`,`total`,`commit_count`,`message`,`branch`,`committed_date`,`start_at`,`end_at`,`timespan`) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'
+    sqltemplate = 'INSERT INTO ' + params['mysql'][
+        'table'] + '(`group`,`project`,`email`,`name`,`author_name`,`additions`,`deletions`,`total`,`commit_count`,`message`,`branch`,`committed_date`,`start_at`,`end_at`,`timespan`,`branch_type`) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'
 
     for item in data_dict:
-        itemDic:dict = item
+        itemDic: dict = item
         # filter group
         # if params['filter'] not in itemDic['group']:
         #     continue
@@ -296,34 +305,48 @@ def write_to_mysql(headers, data_dict):
         values = []
         for ki in range(len(headers)):
             values.append(itemDic[headers[ki]])
-        #values.extend(v.values())
+        # values.extend(v.values())
         values.append(params['since_date'])
         values.append(params['until_date'])
 
         strDate = getYesterday().strftime("%Y%m%d")
         values.append(int(strDate))
+        branch_type = -1
+        if values[9] != '' and values[9].find('Merge') > -1:
+            branch_type = 0
+        else:
+            if values[10] != '' and values[10].find('dev') > -1:
+                branch_type = 1
+            else:
+                branch_type = 2
+        # 合并的请求 不管什么分支：都为0
 
-        insertDB(cur,sqltemplate,values)
-        #print('写入SQL Item:')
-        #print(values)
+        print(values[9], values[10], branch_type)
+        print("==================================")
+
+        values.append(branch_type)
+        insertDB(cur, sqltemplate, values)
+        # print('写入SQL Item:')
+        # print(values)
 
     conn.commit()
     cur.close()
     conn.close()
     print('git commits write to mysql complated!')
 
+
 def get_mysqlconn():
-    db = pymysql.connect(host=params['mysql']['host'],port=params['mysql']['port'],
-                        user=params['mysql']['user'],password=params['mysql']['password'],
-                        db=params['mysql']['db'],charset="utf8"   )
+    db = pymysql.connect(host=params['mysql']['host'], port=params['mysql']['port'],
+                         user=params['mysql']['user'], password=params['mysql']['password'],
+                         db=params['mysql']['db'], charset="utf8")
     return db
 
 
-
-
 def usage():
-    msg = "Usage: %s -t <token> -s <since_date> -u <until_date> -a <api_url> [-h] or %s --token <token> --sincedate <since_date> --untildate <until_date> --apiurl <api_url> [--help]" % (sys.argv[0], sys.argv[0])
+    msg = "Usage: %s -t <token> -s <since_date> -u <until_date> -a <api_url> [-h] or %s --token <token> --sincedate <since_date> --untildate <until_date> --apiurl <api_url> [--help]" % (
+        sys.argv[0], sys.argv[0])
     print(msg)
+
 
 # 处理参数
 def main(argv):
@@ -333,9 +356,9 @@ def main(argv):
         usage()
         sys.exit(2)
 
-    has_token = 0 # 是否传了token参数
-    has_since_date = 0 # 开始时间
-    has_until_date = 0 # 结束时间
+    has_token = 0  # 是否传了token参数
+    has_since_date = 0  # 开始时间
+    has_until_date = 0  # 结束时间
     for opt, arg in opts:
         if opt in ('h', 'help'):
             usage()
@@ -354,26 +377,27 @@ def main(argv):
         elif opt in ("-f", "--filter"):
             params['filter'] = arg
 
-    if has_token == 0: #or has_since_date == 0 or has_until_date == 0:
+    if has_token == 0:  # or has_since_date == 0 or has_until_date == 0:
         usage()
         sys.exit()
 
+    if params['since_date'] == '' and params['until_date'] == '':
+        params['since_date'], params['until_date'] = getStatsTime()
 
-    if params['since_date'] == '' and params['until_date'] =='':
-        params['since_date'],params['until_date'] = getStatsTime()
-    
-    print('gitlab stats starting...... , at time : '  +  time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) )
+    print('gitlab stats starting...... , at time : ' + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
     print(params)
     getStas()
     print('complated & exit')
-   
-def getYesterday(): 
+
+
+def getYesterday():
     yesterday = datetime.date.today() + datetime.timedelta(-1)
     return yesterday
 
+
 def getStatsTime():
     strDate = getYesterday().strftime("%Y-%m-%d")
-    return strDate +' 00:00:00' , strDate + ' 23:59:59'
+    return strDate + ' 00:00:00', strDate + ' 23:59:59'
 
 
 if __name__ == "__main__":
