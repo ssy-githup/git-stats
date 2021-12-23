@@ -1,5 +1,8 @@
 FROM python:3.8.12
 
+ENV LANG=C.UTF-8 \
+    TZ="Asia/Shanghai"
+
 RUN cp /etc/apt/sources.list /etc/apt/sources.list.bak && \
     sed -i 's http://.*.debian.org http://mirrors.aliyun.com g' /etc/apt/sources.list
 
