@@ -19,27 +19,22 @@ project_result = {}
 all_commits = {}
 
 # 参数
+
 params = {
     "mysql": {
-        "host": 'mysqlchehouyunwei.service.yctxy',
+        "host": 'your_host',
         "port": 3306,
-        "user": 'chehouyunweisentry_rw',
-        "password": 'u=PGqIwfEI5=DTS',
-        "db": 'chehouyunweisentry',
+        "user": 'your user_name',
+        "password": 'your password',
+        "db": 'dbName',
         "table": 'commit_stats'
 
-        # "host": '192.168.87.208',
-        # "port": 3306,
-        # "user": 'root',
-        # "password": '43RmMZzX7yZkpFe',
-        # "db": 'test_mysql',
-        # "table": 'commit_stats'
     },
     "token": '',  # token信息
-    "base_url": 'http://gitlab2.bitautotech.com/api/v4',  # gitlab api访问url前缀， eg. https://gitlab.com/api/v4
+    "base_url": 'your address',  # gitlab api访问url前缀， eg. https://gitlab.com/api/v4
     "since_date": '',  # 统计开始日期， eg. 2019-09-05 00:00:00
     "until_date": '',  # 统计终止日期, eg. 2019-09-12 00:00:00
-    "filter": 'AutoAftermarket'
+    "filter": ''
 }
 
 
